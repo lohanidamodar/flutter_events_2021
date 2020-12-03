@@ -1,7 +1,12 @@
+import 'package:firebase_helpers/firebase_helpers.dart';
 import 'package:firebasestarter/core/presentation/providers/providers.dart';
+import 'package:firebasestarter/core/presentation/res/colors.dart';
+import 'package:firebasestarter/features/events/data/models/app_event.dart';
+import 'package:firebasestarter/features/events/data/services/event_firestore_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebasestarter/core/presentation/res/routes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -9,6 +14,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  CalendarController _calendarController;
+  @override
+  void initState() {
+    super.initState();
+    _calendarController = CalendarController();
+  }
+
   @override
   void didChangeDependencies() {
     context.read(pnProvider).init();
@@ -31,11 +43,77 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              "Home Page",
-              style: Theme.of(context).textTheme.title,
+            Card(
+              clipBehavior: Clip.antiAlias,
+              margin: const EdgeInsets.all(8.0),
+              child: TableCalendar(
+                calendarController: _calendarController,
+                weekendDays: [6],
+                headerStyle: HeaderStyle(
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryColor,
+                  ),
+                  headerMargin: const EdgeInsets.only(bottom: 8),
+                  titleTextStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18.0,
+                  ),
+                  formatButtonTextStyle: TextStyle(
+                    color: Colors.white,
+                  ),
+                  formatButtonDecoration: BoxDecoration(
+                    border: Border.all(color: Colors.white),
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  leftChevronIcon: Icon(
+                    Icons.chevron_left,
+                    color: Colors.white,
+                  ),
+                  rightChevronIcon: Icon(
+                    Icons.chevron_right,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            StreamBuilder(
+              stream: eventDBS.streamQueryList(
+                args: [
+                  QueryArgsV2('user_id',
+                      isEqualTo: context.read(userRepoProvider).user.id),
+                ],
+              ),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Container(
+                    child: Text("Error"),
+                  );
+                }
+                if (snapshot.hasData) {
+                  List<AppEvent> events = snapshot.data;
+                  return ListView.builder(
+                    itemCount: events.length,
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemBuilder: (BuildContext context, int index) {
+                      return ListTile(
+                        title: Text(events[index].title),
+                      );
+                    },
+                  );
+                }
+                return CircularProgressIndicator();
+              },
             ),
           ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () => Navigator.pushNamed(
+          context,
+          AppRoutes.addEvent,
+          arguments: _calendarController.selectedDay,
         ),
       ),
     );
