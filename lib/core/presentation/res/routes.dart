@@ -1,4 +1,5 @@
 import 'package:firebasestarter/features/events/presentation/pages/add_event.dart';
+import 'package:firebasestarter/features/events/presentation/pages/event_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:firebasestarter/features/auth/presentation/pages/home.dart';
@@ -16,14 +17,19 @@ class AppRoutes {
   static const String profile = "profile";
   static const String editProfile = "edit_profile";
   static const String addEvent = "add_event";
+  static const String viewEvent = "view_event";
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     return MaterialPageRoute(
         settings: settings,
         builder: (_) {
           switch (settings.name) {
+            case viewEvent:
+              return EventDetails(event: settings.arguments);
             case addEvent:
-              return AddEventPage(selectedDate: settings.arguments,);
+              return AddEventPage(
+                selectedDate: settings.arguments,
+              );
             case home:
               return AuthHomePage();
             case userInfo:

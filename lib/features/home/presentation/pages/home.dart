@@ -6,6 +6,7 @@ import 'package:firebasestarter/features/events/data/services/event_firestore_se
 import 'package:flutter/material.dart';
 import 'package:firebasestarter/core/presentation/res/routes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HomePage extends StatefulWidget {
@@ -96,8 +97,18 @@ class _HomePageState extends State<HomePage> {
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
                     itemBuilder: (BuildContext context, int index) {
+                      final event = events[index];
                       return ListTile(
-                        title: Text(events[index].title),
+                        title: Text(event.title),
+                        subtitle: Text(DateFormat("EEEE, dd MMMM, yyyy")
+                            .format(event.date)),
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.viewEvent,
+                            arguments: event,
+                          );
+                        },
                       );
                     },
                   );
