@@ -55,6 +55,7 @@ class EventDetails extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: <Widget>[
+          Text(event.public ? "Public" : "Private"),
           ListTile(
             leading: Icon(Icons.event),
             title: Text(
