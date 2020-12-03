@@ -1,4 +1,5 @@
 import 'package:firebasestarter/features/events/data/models/app_event.dart';
+import 'package:firebasestarter/features/events/data/services/event_firestore_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -21,7 +22,33 @@ class EventDetails extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(Icons.delete),
-            onPressed: () {},
+            onPressed: () async {
+              final confirm = await showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text("Warinig!"),
+                      content: Text("Are you sure you want to delete?"),
+                      actions: [
+                        TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: Text("Delete")),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: Text(
+                            "Cancel",
+                            style: TextStyle(color: Colors.grey.shade700),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ) ??
+                  false;
+
+              if (confirm) {
+                await eventDBS.removeItem(event.id);
+                Navigator.pop(context);
+              }
+            },
           )
         ],
       ),
