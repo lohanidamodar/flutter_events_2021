@@ -44,10 +44,16 @@ class _AddEventPageState extends State<AddEventPage> {
                     Map<String, dynamic>.from(_formKey.currentState.value);
                 data["date"] =
                     (data["date"] as DateTime).millisecondsSinceEpoch;
-                await eventDBS.create({
-                  ...data,
-                  "user_id": context.read(userRepoProvider).user.id,
-                });
+                if (widget.event != null) {
+                  //update
+                  await eventDBS.updateData(widget.event.id, data);
+                } else {
+                  //create
+                  await eventDBS.create({
+                    ...data,
+                    "user_id": context.read(userRepoProvider).user.id,
+                  });
+                }
                 Navigator.pop(context);
               },
               child: Text("Save"),

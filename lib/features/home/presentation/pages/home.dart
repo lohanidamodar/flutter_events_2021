@@ -100,6 +100,12 @@ class _HomePageState extends State<HomePage> {
                       final event = events[index];
                       return ListTile(
                         title: Text(event.title),
+                        trailing: IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () => Navigator.pushNamed(
+                              context, AppRoutes.editEvent,
+                              arguments: event),
+                        ),
                         subtitle: Text(DateFormat("EEEE, dd MMMM, yyyy")
                             .format(event.date)),
                         onTap: () {

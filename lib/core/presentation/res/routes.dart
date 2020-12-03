@@ -17,6 +17,7 @@ class AppRoutes {
   static const String profile = "profile";
   static const String editProfile = "edit_profile";
   static const String addEvent = "add_event";
+  static const String editEvent = "edit_event";
   static const String viewEvent = "view_event";
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -24,6 +25,8 @@ class AppRoutes {
         settings: settings,
         builder: (_) {
           switch (settings.name) {
+            case editEvent:
+              return AddEventPage(event: settings.arguments);
             case viewEvent:
               return EventDetails(event: settings.arguments);
             case addEvent:
