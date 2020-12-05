@@ -1,3 +1,4 @@
+import 'package:firebasestarter/core/presentation/res/routes.dart';
 import 'package:firebasestarter/features/events/data/models/app_event.dart';
 import 'package:firebasestarter/features/events/data/services/event_firestore_service.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,13 @@ class EventDetails extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.edit),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushReplacementNamed(
+                context,
+                AppRoutes.editEvent,
+                arguments: event,
+              );
+            },
           ),
           IconButton(
             icon: Icon(Icons.delete),
