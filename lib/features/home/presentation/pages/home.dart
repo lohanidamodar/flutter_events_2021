@@ -26,14 +26,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   _groupEvents(List<AppEvent> events) {
-    Map<DateTime, List<AppEvent>> data = {};
+    _groupedEvents = {};
     events.forEach((event) {
       DateTime date =
           DateTime.utc(event.date.year, event.date.month, event.date.day, 12);
-      if (data[date] == null) data[date] = [];
-      data[date].add(event);
+      if (_groupedEvents[date] == null) _groupedEvents[date] = [];
+      _groupedEvents[date].add(event);
     });
-    _groupedEvents = data;
   }
 
   @override
@@ -60,22 +59,20 @@ class _HomePageState extends State<HomePage> {
             if (snapshot.hasData) {
               final events = snapshot.data;
               _groupEvents(events);
-              DateTime initialDate = _calendarController.selectedDay ??
-                  DateTime.utc(DateTime.now().year, DateTime.now().month,
-                      DateTime.now().day, 12);
-              final _selectedEvents = _groupedEvents[initialDate] ?? [];
+              DateTime selectedDate = _calendarController.selectedDay;
+              final _selectedEvents = _groupedEvents[selectedDate] ?? [];
               return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Card(
                     clipBehavior: Clip.antiAlias,
                     margin: const EdgeInsets.all(8.0),
                     child: TableCalendar(
-                      onDaySelected: (date, events, _) {
+                      calendarController: _calendarController,
+                      events: _groupedEvents,
+                      onDaySelected: (date, events, holidays) {
                         setState(() {});
                       },
-                      initialSelectedDay: initialDate,
-                      events: _groupedEvents,
-                      calendarController: _calendarController,
                       weekendDays: [6],
                       headerStyle: HeaderStyle(
                         decoration: BoxDecoration(
@@ -104,10 +101,13 @@ class _HomePageState extends State<HomePage> {
                       builders: CalendarBuilders(),
                     ),
                   ),
-                  if (_selectedEvents.isEmpty)
-                    ListTile(
-                      title: Text("No events on the selected day"),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12.0, top: 8.0),
+                    child: Text(
+                      DateFormat('EEEE, dd MMMM, yyyy').format(selectedDate),
+                      style: Theme.of(context).textTheme.headline6,
                     ),
+                  ),
                   ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
