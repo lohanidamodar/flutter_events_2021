@@ -81,11 +81,11 @@ class _HomePageState extends State<HomePage> {
             ),
             QueryArgsV2(
               "date",
-              isGreaterThanOrEqualTo: firstDate.millisecondsSinceEpoch,
+              isGreaterThanOrEqualTo: firstDate.subtract(Duration(days:30)).millisecondsSinceEpoch,
             ),
             QueryArgsV2(
               "date",
-              isLessThanOrEqualTo: lastDate.millisecondsSinceEpoch,
+              isLessThanOrEqualTo: lastDate.add(Duration(days: 30)).millisecondsSinceEpoch,
             ),
           ]),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
