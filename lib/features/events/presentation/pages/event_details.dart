@@ -73,6 +73,7 @@ class EventDetails extends StatelessWidget {
                 Text(DateFormat("EEEE, dd MMMM, yyyy").format(event.date)),
           ),
           const SizedBox(height: 10.0),
+          if(event.description != null)
           ListTile(
             leading: Icon(Icons.short_text),
             title: Text(event.description),

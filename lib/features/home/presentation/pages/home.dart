@@ -40,10 +40,23 @@ class _HomePageState extends State<HomePage> {
   _groupEvents(List<AppEvent> events) {
     _groupedEvents = {};
     events.forEach((event) {
-      DateTime date =
-          DateTime.utc(event.date.year, event.date.month, event.date.day, 12);
-      if (_groupedEvents[date] == null) _groupedEvents[date] = [];
-      _groupedEvents[date].add(event);
+      if (event.endDate != null) {
+        for (var i = DateTime.utc(
+                event.date.year, event.date.month, event.date.day, 12);
+            i.millisecondsSinceEpoch <=
+                DateTime.utc(event.endDate.year, event.endDate.month,
+                        event.endDate.day, 12)
+                    .millisecondsSinceEpoch;
+            i = i.add(Duration(days: 1))) {
+          if (_groupedEvents[i] == null) _groupedEvents[i] = [];
+          _groupedEvents[i].add(event);
+        }
+      } else {
+        DateTime date =
+            DateTime.utc(event.date.year, event.date.month, event.date.day, 12);
+        if (_groupedEvents[date] == null) _groupedEvents[date] = [];
+        _groupedEvents[date].add(event);
+      }
     });
   }
 
@@ -95,13 +108,13 @@ class _HomePageState extends State<HomePage> {
                       onDaySelected: (date, events, holidays) {
                         setState(() {});
                       },
-                      onCalendarCreated: (first,last,format){
+                      onCalendarCreated: (first, last, format) {
                         // setState(() {
-                          firstDate = beginingOfDay(first);
-                          lastDate = endOfDay(last);
+                        firstDate = beginingOfDay(first);
+                        lastDate = endOfDay(last);
                         // });
                       },
-                      onVisibleDaysChanged: (first,last,format) {
+                      onVisibleDaysChanged: (first, last, format) {
                         setState(() {
                           firstDate = beginingOfDay(first);
                           lastDate = endOfDay(last);

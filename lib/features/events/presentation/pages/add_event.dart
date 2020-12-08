@@ -38,12 +38,14 @@ class _AddEventPageState extends State<AddEventPage> {
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
               onPressed: () async {
-                //save
+                if(!_formKey.currentState.validate())return;
                 _formKey.currentState.save();
                 final data =
                     Map<String, dynamic>.from(_formKey.currentState.value);
                 data["date"] =
                     (data["date"] as DateTime).millisecondsSinceEpoch;
+                data["end_date"] =
+                    (data["end_date"] as DateTime)?.millisecondsSinceEpoch;
                 if (widget.event != null) {
                   //update
                   await eventDBS.updateData(widget.event.id, data);
@@ -71,6 +73,8 @@ class _AddEventPageState extends State<AddEventPage> {
               children: [
                 FormBuilderTextField(
                   name: "title",
+                  validator: FormBuilderValidators.compose(
+                      [FormBuilderValidators.required(context)]),
                   initialValue: widget.event?.title,
                   decoration: InputDecoration(
                       hintText: "Add Title",
@@ -101,6 +105,8 @@ class _AddEventPageState extends State<AddEventPage> {
                 Divider(),
                 FormBuilderDateTimePicker(
                   name: "date",
+                  validator: FormBuilderValidators.compose(
+                      [FormBuilderValidators.required(context)]),
                   initialValue: widget.selectedDate ??
                       widget.event?.date ??
                       DateTime.now(),
@@ -113,6 +119,30 @@ class _AddEventPageState extends State<AddEventPage> {
                     border: InputBorder.none,
                     prefixIcon: Icon(Icons.calendar_today_sharp),
                   ),
+                ),
+                Divider(),
+                FormBuilderDateTimePicker(
+                  name: "end_date",
+                  initialValue: widget.event?.endDate,
+                  initialDate: DateTime.now(),
+                  validator: (val) {
+                    if(val == null) return null;
+                    var startDate = (_formKey.currentState.fields['date']?.value
+                            as DateTime)
+                        ?.millisecondsSinceEpoch;
+                    if (startDate == null) return null;
+                    if (startDate > val.millisecondsSinceEpoch) {
+                      return "End date cannot be before than start date";
+                    }
+                    return null;
+                  },
+                  initialDatePickerMode: DatePickerMode.day,
+                  inputType: InputType.date,
+                  format: DateFormat('EEEE, dd MMMM, yyyy'),
+                  decoration: InputDecoration(
+                      border: InputBorder.none,
+                      prefixIcon: Icon(Icons.calendar_today_sharp),
+                      hintText: "End Date"),
                 ),
                 Divider(),
               ],
