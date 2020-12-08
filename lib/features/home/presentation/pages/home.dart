@@ -1,5 +1,6 @@
 import 'package:firebase_helpers/firebase_helpers.dart';
 import 'package:firebasestarter/core/presentation/providers/providers.dart';
+import 'package:firebasestarter/core/presentation/res/utils.dart';
 import 'package:firebasestarter/features/events/data/models/app_event.dart';
 import 'package:firebasestarter/features/events/data/services/event_firestore_service.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,17 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   CalendarController _calendarController = CalendarController();
   Map<DateTime, List<AppEvent>> _groupedEvents;
+  DateTime firstDate;
+  DateTime lastDate;
+  DateTime today;
+  @override
+  void initState() {
+    super.initState();
+    today = DateTime.now();
+    firstDate = beginingOfDay(DateTime(today.year, today.month, 1));
+    lastDate = endOfDay(lastDayOfMonth(today));
+  }
+
   @override
   void didChangeDependencies() {
     context.read(pnProvider).init();
@@ -54,12 +66,22 @@ class _HomePageState extends State<HomePage> {
               "user_id",
               isEqualTo: context.read(userRepoProvider).user.id,
             ),
+            QueryArgsV2(
+              "date",
+              isGreaterThanOrEqualTo: firstDate.millisecondsSinceEpoch,
+            ),
+            QueryArgsV2(
+              "date",
+              isLessThanOrEqualTo: lastDate.millisecondsSinceEpoch,
+            ),
           ]),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.hasData) {
               final events = snapshot.data;
               _groupEvents(events);
-              DateTime selectedDate = _calendarController.selectedDay;
+              DateTime selectedDate = _calendarController.selectedDay ??
+                  DateTime.utc(DateTime.now().year, DateTime.now().month,
+                      DateTime.now().day, 12);
               final _selectedEvents = _groupedEvents[selectedDate] ?? [];
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,6 +94,18 @@ class _HomePageState extends State<HomePage> {
                       events: _groupedEvents,
                       onDaySelected: (date, events, holidays) {
                         setState(() {});
+                      },
+                      onCalendarCreated: (first,last,format){
+                        // setState(() {
+                          firstDate = beginingOfDay(first);
+                          lastDate = endOfDay(last);
+                        // });
+                      },
+                      onVisibleDaysChanged: (first,last,format) {
+                        setState(() {
+                          firstDate = beginingOfDay(first);
+                          lastDate = endOfDay(last);
+                        });
                       },
                       weekendDays: [6],
                       headerStyle: HeaderStyle(
