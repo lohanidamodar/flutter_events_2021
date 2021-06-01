@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:firebase_helpers/firebase_helpers.dart';
 import 'package:firebasestarter/core/presentation/providers/providers.dart';
 import 'package:firebasestarter/features/events/data/models/app_event.dart';
@@ -11,28 +13,41 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../../../core/presentation/res/colors.dart';
 import '../../../../core/presentation/res/sizes.dart';
 
+final kNow = DateTime.now();
+final kFirstDay = DateTime(kNow.year, kNow.month - 3, kNow.day);
+final kLastDay = DateTime(kNow.year, kNow.month + 3, kNow.day);
+
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  CalendarController _calendarController = CalendarController();
-  Map<DateTime, List<AppEvent>> _groupedEvents;
+  LinkedHashMap<DateTime, List<AppEvent>> _groupedEvents;
+  DateTime _focusedDay = DateTime.now();
+  DateTime _selectedDay = DateTime.now();
   @override
   void didChangeDependencies() {
     context.read(pnProvider).init();
     super.didChangeDependencies();
   }
 
+  int getHashCode(DateTime key) {
+    return key.day * 1000000 + key.month * 10000 + key.year;
+  }
+
   _groupEvents(List<AppEvent> events) {
-    _groupedEvents = {};
+    _groupedEvents = LinkedHashMap(equals: isSameDay, hashCode: getHashCode);
     events.forEach((event) {
       DateTime date =
           DateTime.utc(event.date.year, event.date.month, event.date.day, 12);
       if (_groupedEvents[date] == null) _groupedEvents[date] = [];
       _groupedEvents[date].add(event);
     });
+  }
+
+  List<dynamic> _getEventsForDay(DateTime date) {
+    return _groupedEvents[date] ?? [];
   }
 
   @override
@@ -59,7 +74,7 @@ class _HomePageState extends State<HomePage> {
             if (snapshot.hasData) {
               final events = snapshot.data;
               _groupEvents(events);
-              DateTime selectedDate = _calendarController.selectedDay;
+              DateTime selectedDate = _selectedDay;
               final _selectedEvents = _groupedEvents[selectedDate] ?? [];
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,10 +83,17 @@ class _HomePageState extends State<HomePage> {
                     clipBehavior: Clip.antiAlias,
                     margin: const EdgeInsets.all(8.0),
                     child: TableCalendar(
-                      calendarController: _calendarController,
-                      events: _groupedEvents,
-                      onDaySelected: (date, events, holidays) {
-                        setState(() {});
+                      focusedDay: _focusedDay,
+                      selectedDayPredicate: (day) =>
+                          isSameDay(day, _selectedDay),
+                      firstDay: kFirstDay,
+                      lastDay: kLastDay,
+                      eventLoader: _getEventsForDay,
+                      onDaySelected: (selectedDay, focusedDay) {
+                        setState(() {
+                          _selectedDay = selectedDay;
+                          _focusedDay = focusedDay;
+                        });
                       },
                       weekendDays: [6],
                       headerStyle: HeaderStyle(
@@ -98,7 +120,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       calendarStyle: CalendarStyle(),
-                      builders: CalendarBuilders(),
+                      calendarBuilders: CalendarBuilders(),
                     ),
                   ),
                   Padding(
@@ -143,7 +165,7 @@ class _HomePageState extends State<HomePage> {
         child: Icon(Icons.add),
         onPressed: () {
           Navigator.pushNamed(context, AppRoutes.addEvent,
-              arguments: _calendarController.selectedDay);
+              arguments: _selectedDay);
         },
       ),
     );

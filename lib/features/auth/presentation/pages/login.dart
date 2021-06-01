@@ -1,6 +1,5 @@
 import 'package:firebasestarter/core/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 import 'package:firebasestarter/generated/l10n.dart';
 import '../widgets/auth_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -81,8 +80,8 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
               ),
               const SizedBox(height: 50.0),
-              GoogleSignInButton(
-                text: S.of(context).googleButtonText,
+              ElevatedButton(
+                child: Text(S.of(context).googleButtonText),
                 onPressed: () async {
                   if (!await context.read(userRepoProvider).signInWithGoogle())
                     _key.currentState.showSnackBar(SnackBar(

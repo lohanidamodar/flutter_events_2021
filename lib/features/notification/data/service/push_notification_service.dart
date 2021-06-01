@@ -4,7 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:developer' as dev;
 
 class PushNotificationService {
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   bool initialized = false;
   String token;
 
@@ -18,7 +18,7 @@ class PushNotificationService {
       if(Platform.isIOS) {
         _requestPermission();
       }
-      _firebaseMessaging.configure(
+      /* _firebaseMessaging.configure(
         onMessage: (Map<String,dynamic> message) {
           dev.log("notification onMessage",error: message,time: DateTime.now());
           return;
@@ -31,7 +31,7 @@ class PushNotificationService {
           dev.log("notification onMessage",error: message,time: DateTime.now());
           return;
         },
-      );
+      ); */
       token =  await _firebaseMessaging.getToken();
       if(token != null) {
         initialized = true;
@@ -43,13 +43,13 @@ class PushNotificationService {
   }
 
   FutureOr<bool> _requestPermission() {
-    return _firebaseMessaging.requestNotificationPermissions(
+    /* return _firebaseMessaging.requestNotificationPermissions(
       const IosNotificationSettings(
         sound: true,
         badge: true,
         alert: true,
         provisional: false,
       )
-    );
+    ); */
   }
 }

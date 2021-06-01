@@ -155,11 +155,10 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future getImage(ImageSource source) async {
-    var image = await ImagePicker.pickImage(
-        source: source);
+    var image = await ImagePicker().getImage(source: source);
     if(image == null) return;
     setState(() {
-      _image = image;
+      _image = File(image.path);
       _cropImage();
       Navigator.pop(context);
     });

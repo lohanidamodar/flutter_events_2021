@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebasestarter/core/presentation/providers/providers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebasestarter/app.dart';
 import 'package:firebasestarter/core/presentation/res/app_config.dart';
@@ -11,8 +12,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  Crashlytics.instance.enableInDevMode = true;
-  FlutterError.onError = Crashlytics.instance.recordFlutterError;
+  
+  if(kDebugMode) {
+    await FirebaseCrashlytics.instance
+      .setCrashlyticsCollectionEnabled(false);
+  }
+
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
   runZonedGuarded<Future<void>>(() async {
     runApp(
       Directionality(
@@ -37,5 +43,5 @@ void main() async {
     );
   },
       (Object error, StackTrace stackTrace) =>
-          Crashlytics.instance.recordError(error, stackTrace));
+          FirebaseCrashlytics.instance.recordError(error, stackTrace));
 }
